@@ -51,10 +51,28 @@
 
 ## 4. Change log
 - 2026-07-02 00:31: 分支建立、目录骨架、WT manifest（528,365）、fast 配置锁定；
-  权重下载（ESMC-6B ~24G/25.4G）、Ibex env 构建、代码/输入同步 —— 均进行中。
+  权重下载、Ibex env 构建、代码/输入同步 —— 完成。
+- 2026-07-02 00:5x: benchmark 调试三连（每次 sbatch 快速暴露一个问题）：
+  1. **cu130 too old**：esm 默认拉 torch 2.12.1+cu130，但 a100 驱动为 CUDA 12.8 →
+     在 mgnify-esm 重装 **torch 2.11.0+cu128**（已写入 setup_ibex_env.sh，可复现）。
+  2. **CCD offline 缺失**：`ESMFold2InputBuilder` 需 `ccd.pkl`（来自 biohub/ESMFold2），
+     compute node 无外网 → login node 预下 `ccd.pkl`（417MB）到 hf_cache，脚本设 `ESMCFOLD_CCD_PATH`。
+  3. **bf16 dtype 冲突**：模型 bf16 但输入 featurization 为 fp32（`mat1/mat2 dtype` 报错）→
+     改用 **float32**（native 精度，零冲突，质量最佳；显存仅 13.6GB）。
+- 2026-07-02 01:10: benchmark 通过（200/200，见 §5）；提交全量 array `47941241`（0-199%20, fp32）。
 
-## 5. Results（所有作业完成后填）
-- benchmark：每条耗时 / 显存 / 输出平均大小 / bf16-vs-fp32 → 待填
-- 全量：完成数 / 覆盖率 / 失败数 / pLDDT 分布 / 总磁盘占用 → 待填
-- 结构绝对路径（最终确认）：见 §3 ★
-- 复现命令：见 sh/ 脚本
+## 5. Results
+### Benchmark（job 47941188, A100-80GB, fp32, 200 WT）
+- **200/200 成功，0 失败**；速度 **~1.0 s/structure**（steady state）；模型加载 13s。
+- **显存 13.6 GB**（40GB a100 亦可）；输出 **平均 11.8 KB/结构**（gzip mmCIF）。
+- pLDDT（0–1 尺度）样例 0.50–0.77，pTM 0.29–0.57（小 domain，中等置信度符合预期）。
+- **全量投影**：528,365 × 1.0s ≈ **147 GPU-h ≈ 6.1 GPU-day**；总输出 **~6.2 GB**。
+
+### 全量 array（job 47941241 — RUNNING/PENDING，完成后补全）
+- 配置：200 shards（~2,642 WT/shard, ~44min）× walltime 1:15:00 × 并发 %20 × fp32 × seed 0。
+- 完成数 / 覆盖率 / 失败数 / pLDDT 分布 / 总磁盘占用 → 待填。
+- ★ **预测结构绝对路径（Ibex）**：
+  `/ibex/user/guoj0f/absolute-stability-predictor/mgnify-structure-prediction-by-esmfold2/data/esmfold2-fast-pred-structure/`
+  （256 桶 `md5(id)[:2]`，每个 `<id>.cif.gz`）
+- 复现：`ibex-records/mgnify-structure-prediction-by-esmfold2/sh/fold_array_20260702-010936.sh`
+- 验收：`check_completeness.py --manifest wt_manifest.csv --out-dir <★> --redo-manifest redo.csv`

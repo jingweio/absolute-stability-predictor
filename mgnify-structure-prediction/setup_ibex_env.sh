@@ -21,6 +21,12 @@ echo "[pip] installing esm (editable) + deps from $ESM_SRC"
 pip install --upgrade pip
 pip install -e "$ESM_SRC"
 
+# The default torch wheel pulled by esm is cu130 (CUDA 13), but Ibex a100 nodes run
+# an older driver (CUDA 12.8 / 12080) -> torch.cuda fails to init. Reinstall torch
+# built for cu128 so CUDA initialises on the compute nodes.
+echo "[pip] reinstalling torch for cu128 (Ibex a100 driver = CUDA 12.8)"
+pip install --force-reinstall torch --index-url https://download.pytorch.org/whl/cu128
+
 echo "[verify] imports"
 python - <<'PY'
 import torch

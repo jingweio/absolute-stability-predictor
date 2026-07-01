@@ -22,12 +22,13 @@ MANIFEST=$IBEXBR/data/esmfold2_fast_wt_input/wt_manifest.csv
 OUTDIR=$IBEXBR/data/esmfold2-fast-pred-structure
 LOGDIR=$IBEXBR/ibex-records/mgnify-structure-prediction-by-esmfold2/results/benchmark_logs
 
-echo "=== BENCHMARK: 200 WT, bfloat16, num_loops=3 num_sampling_steps=50 ==="
+rm -f "$LOGDIR"/shard0000_*.tsv   # clean previous benchmark logs for a fresh timing
+echo "=== BENCHMARK: 200 WT, float32, num_loops=3 num_sampling_steps=50 ==="
 time python $IBEXBR/mgnify-structure-prediction/esmfold2_fast_predict.py \
     --manifest "$MANIFEST" --out-dir "$OUTDIR" --log-dir "$LOGDIR" \
     --shard-id 0 --num-shards 1 --limit 200 \
     --model biohub/ESMFold2-Fast --num-loops 3 --num-sampling-steps 50 \
-    --dtype bfloat16 --seed 0 --hf-home "$HF_HOME"
+    --dtype float32 --seed 0 --hf-home "$HF_HOME"
 
 echo "=== output footprint sample ==="
 NFILES=$(find "$OUTDIR" -name '*.cif.gz' | wc -l)

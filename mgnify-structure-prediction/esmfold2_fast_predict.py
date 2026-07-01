@@ -59,10 +59,14 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--dtype", choices=["float32", "bfloat16", "float16"], default="bfloat16")
     ap.add_argument("--hf-home", default=os.environ.get("HF_HOME", "/ibex/user/guoj0f/share/hf_cache"))
+    ap.add_argument("--ccd-path", default=None, help="path to pre-staged ccd.pkl (default <hf_home>/ccd.pkl)")
     args = ap.parse_args()
 
     os.environ["HF_HOME"] = args.hf_home
     os.environ.setdefault("HF_HUB_OFFLINE", "1")  # weights pre-staged; don't hit network on compute node
+    # ESMFold2InputBuilder needs the CCD dict; compute nodes have no internet, so point
+    # it at the pre-staged ccd.pkl (downloaded once on the login node from biohub/ESMFold2).
+    os.environ["ESMCFOLD_CCD_PATH"] = args.ccd_path or os.path.join(args.hf_home, "ccd.pkl")
 
     import torch
     from esm.models.esmfold2 import (
