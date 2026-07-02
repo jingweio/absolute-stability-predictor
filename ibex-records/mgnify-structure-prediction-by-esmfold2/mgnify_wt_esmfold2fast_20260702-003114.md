@@ -84,3 +84,14 @@
 
 ## 6. 状态：DONE ✅（2026-07-02 ~10:52）
 528,365 个 WT 结构全部预测完成、100% 覆盖、0 失败，暂存于 Ibex（见 §5 ★路径）。
+
+## 7. 补充任务: orphan WT structures（filtered-WT, structure-only）
+- **目的**：为 **4,623 个 orphan scaffold**（WT 被 filter 出训练索引，但其 mutant 仍在 train）补 fold WT 结构，供 orphan mutant **threading**（补齐主任务按 WT 行 fold 时漏掉的这部分）。
+- **数据来源**：orphan WT 序列从完整 CSV `230515_...csv` 的 `aa_seq` 找回（实测 **4,623/4,623**，0 缺失）。
+- **⚠ 尊重作者 benchmark 设计（用户第4点）**：这些 WT 为 **structure-only** —— 标 `split=filtered_wt_structure_only`、`ddg_eligible=False`，**绝不作为训练/benchmark 样本**（不重新引入被 filter 的 WT）。关联的 **6,391 个 orphan mutant 全部在 `train` split**（不碰 test/val benchmark）。
+- **不混淆（用户第2点）**：输出到**独立目录** `data/esmfold2-fast-pred-structure-orphan-wt/`（256 桶），**与主 528,365 严格分开**；跑完单独同步回本地。
+- **link（用户第3点）**：`data/esmfold2_fast_orphan_wt_input/orphan_mutant_structure_links.csv`
+  （`mutant_name → PDB_name → wt_structure_relpath`，附 `ddg_eligible=False`）供下游用 MGnify 训练 dG 时消费这批 orphan mutant 的 WT 结构。
+- **配置**：同主任务（ESMFold2-Fast / 单序列 / fp32 / `num_loops=3, num_sampling_steps=50`, seed 0）；SLURM array `0-7%8`, walltime `0:45:00`；脚本 `sh/fold_orphan_wt_20260702-141644.sh`。
+- **★ orphan WT 结构绝对路径（Ibex）**：`…/mgnify-structure-prediction-by-esmfold2/data/esmfold2-fast-pred-structure-orphan-wt/`
+- job id / 覆盖率 / 磁盘 → 待填。
