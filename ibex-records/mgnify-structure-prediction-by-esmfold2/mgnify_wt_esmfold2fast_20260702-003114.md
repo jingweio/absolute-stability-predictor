@@ -1,5 +1,5 @@
 # mgnify-structure-prediction-by-esmfold2 — experiment record
-(created 2026-07-02 00:31; status: **DONE ✅** — 528,365 WT 全部完成, 100% 覆盖, 0 失败)
+(created 2026-07-02 00:31; status: **DONE ✅** — 528,365 WT + 4,623 orphan WT 全部完成(100%/0 fail); ESMFold2-Fast vs 作者 AF2 一致性验证通过)
 
 ## 1. Goal / hypothesis
 用 **ESMFold2-Fast**（Biohub, 2026-05 发布）为 **MGnify Stability Dataset** 的 **WT scaffold**
@@ -93,5 +93,18 @@
 - **link（用户第3点）**：`data/esmfold2_fast_orphan_wt_input/orphan_mutant_structure_links.csv`
   （`mutant_name → PDB_name → wt_structure_relpath`，附 `ddg_eligible=False`）供下游用 MGnify 训练 dG 时消费这批 orphan mutant 的 WT 结构。
 - **配置**：同主任务（ESMFold2-Fast / 单序列 / fp32 / `num_loops=3, num_sampling_steps=50`, seed 0）；SLURM array `0-7%8`, walltime `0:45:00`；脚本 `sh/fold_orphan_wt_20260702-141644.sh`。
-- **★ orphan WT 结构绝对路径（Ibex）**：`…/mgnify-structure-prediction-by-esmfold2/data/esmfold2-fast-pred-structure-orphan-wt/`
-- job id / 覆盖率 / 磁盘 → 待填。
+- **★ orphan WT 结构绝对路径（Ibex）**：`…/mgnify-structure-prediction-by-esmfold2/data/esmfold2-fast-pred-structure-orphan-wt/`；本地同名相对路径 `data/esmfold2-fast-pred-structure-orphan-wt/`。
+- **结果 ✅**：job **47956057**（array 0-7%8）；**4,623/4,623 = 100% 覆盖，0 失败**；pLDDT mean **0.752**（≥0.7 高 86.5% / 0.5-0.7 中 12.8% / <0.5 低仅 0.7% —— 比主集 0.687 更高，符合 "WT domain 更易折"）；Ibex 磁盘 62M；**已同步回本地**（实测 4,623 文件）。
+
+## 8. 结构准确性验证（ESMFold2-Fast vs 作者 AF2 demo）— sanity-check ✅
+- **目的**：无实验 GT，用作者提供的 2 个 mgnify demo 结构与我们 ESMFold2-Fast 折**同序列**的结果比一致性，作为**整条 ESMFold2-Fast 预测流程（模型/精度/输出/后处理）无大问题的 sanity-check**。
+- **对比对象**：`examples/mgnify_1A0N.pdb`（58aa, SH3-like）、`examples/mgnify_1A32.pdb`（63aa, helical）—— 作者消费使用的结构（论文用 **AlphaFold2**）。
+- **方法**：CA-RMSD（Kabsch 叠合）/ TM-score（Kabsch，真实 TM-align ≥ 此下界）/ CA-lDDT（免叠合、最稳健）；脚本 `mgnify-structure-prediction/compare_structures.py`；job 47956427。
+
+| case | L | CA-RMSD | TM-score | CA-lDDT |
+|---|---|---|---|---|
+| mgnify_1A0N | 58 | **0.49 Å** | **0.972** | **0.981** |
+| mgnify_1A32 | 63 | **0.25 Å** | **0.992** | **0.990** |
+
+- **结论**：亚埃级、TM>0.97、lDDT>0.98 —— **ESMFold2-Fast 与作者 AF2 消费结构高度一致**，整条预测流程验证**无大问题** ✅。
+- **边界（勿过度外推）**：仅 **2 个**作者样本、且偏高置信易折案例；TM-score 为下界；full set 中低 pLDDT（<0.5 占 8.6%）部分的一致性**未被这 2 个 case 覆盖**。
