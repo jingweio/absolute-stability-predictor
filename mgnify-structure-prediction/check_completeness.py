@@ -73,11 +73,16 @@ def main() -> int:
             plddts.sort()
             n = len(plddts)
             mean = sum(plddts) / n
-            print(f"\npLDDT over {n:,} folded: mean={mean:.1f} "
-                  f"min={plddts[0]:.1f} p10={plddts[n//10]:.1f} "
-                  f"median={plddts[n//2]:.1f} max={plddts[-1]:.1f}")
-            print(f"  <50 (low conf): {sum(1 for x in plddts if x < 50):,} "
-                  f"({100*sum(1 for x in plddts if x < 50)/n:.1f}%)")
+            # ESMFold2 pLDDT is on a 0-1 scale (not 0-100).
+            print(f"\npLDDT over {n:,} folded: mean={mean:.3f} "
+                  f"min={plddts[0]:.3f} p10={plddts[n//10]:.3f} "
+                  f"median={plddts[n//2]:.3f} max={plddts[-1]:.3f}")
+            lo = sum(1 for x in plddts if x < 0.5)
+            mid = sum(1 for x in plddts if 0.5 <= x < 0.7)
+            hi = n - lo - mid
+            print(f"  <0.5 (low):  {lo:,} ({100*lo/n:.1f}%)")
+            print(f"  0.5-0.7:     {mid:,} ({100*mid/n:.1f}%)")
+            print(f"  >=0.7 (high):{hi:,} ({100*hi/n:.1f}%)")
 
     return 0 if not missing else 1
 

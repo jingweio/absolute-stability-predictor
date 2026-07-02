@@ -1,5 +1,5 @@
 # mgnify-structure-prediction-by-esmfold2 — experiment record
-(created 2026-07-02 00:31; status: **RUNNING** — deploy/benchmark 阶段)
+(created 2026-07-02 00:31; status: **DONE ✅** — 528,365 WT 全部完成, 100% 覆盖, 0 失败)
 
 ## 1. Goal / hypothesis
 用 **ESMFold2-Fast**（Biohub, 2026-05 发布）为 **MGnify Stability Dataset** 的 **WT scaffold**
@@ -68,11 +68,19 @@
 - pLDDT（0–1 尺度）样例 0.50–0.77，pTM 0.29–0.57（小 domain，中等置信度符合预期）。
 - **全量投影**：528,365 × 1.0s ≈ **147 GPU-h ≈ 6.1 GPU-day**；总输出 **~6.2 GB**。
 
-### 全量 array（job 47941241 — RUNNING/PENDING，完成后补全）
-- 配置：200 shards（~2,642 WT/shard, ~44min）× walltime 1:15:00 × 并发 %20 × fp32 × seed 0。
-- 完成数 / 覆盖率 / 失败数 / pLDDT 分布 / 总磁盘占用 → 待填。
-- ★ **预测结构绝对路径（Ibex）**：
+### 全量 array（job 47941241 — **DONE ✅**）
+- 配置：200 shards（~2,642 WT/shard, 实测 ~43min/shard）× walltime 1:15:00 × 并发 %20 × fp32 × seed 0。
+- **结果（完整性验收通过）**：
+  - **完成 528,365 / 528,365 = 100.0000% 覆盖，0 失败** ✅（实际 .cif.gz 文件数 = 528,365，与 manifest 一致）
+  - 墙钟 ~9.7h（01:10 提交 → 10:52 完成）：前段并发被其他作业挤到 ~2–5，其他作业结束后爬满 %20 提速跑完。
+  - **pLDDT 分布**（0–1 尺度）：mean **0.687**，mean pTM 0.537；≥0.7 高 **58.4%**（308,373）、0.5–0.7 中 33.1%（174,630）、<0.5 低 **8.6%**（45,362）。
+  - **总磁盘占用 6.9 GB**（平均 ~13 KB/结构，gzip mmCIF）。
+  - 抽查 `rocklin_batch2_667445.cif.gz` 为合法 mmCIF（455 原子行）。
+- ★ **预测结构绝对路径（Ibex，暂存于此）**：
   `/ibex/user/guoj0f/absolute-stability-predictor/mgnify-structure-prediction-by-esmfold2/data/esmfold2-fast-pred-structure/`
-  （256 桶 `md5(id)[:2]`，每个 `<id>.cif.gz`）
+  （256 桶 `md5(id)[:2]`，每个 `<id>.cif.gz`；B-factor/plddt 记于 `results/fold_logs/shard*_metrics.tsv`）
 - 复现：`ibex-records/mgnify-structure-prediction-by-esmfold2/sh/fold_array_20260702-010936.sh`
-- 验收：`check_completeness.py --manifest wt_manifest.csv --out-dir <★> --redo-manifest redo.csv`
+- 验收：`check_completeness.py --manifest wt_manifest.csv --out-dir <★> --redo-manifest redo.csv --metrics-glob '<fold_logs>/shard*_metrics.tsv'`
+
+## 6. 状态：DONE ✅（2026-07-02 ~10:52）
+528,365 个 WT 结构全部预测完成、100% 覆盖、0 失败，暂存于 Ibex（见 §5 ★路径）。
