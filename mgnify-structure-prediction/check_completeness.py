@@ -9,14 +9,9 @@ Optionally aggregates per-shard metric TSVs to summarise the pLDDT distribution.
 import argparse
 import csv
 import glob
-import hashlib
 import os
 
 csv.field_size_limit(1 << 24)
-
-
-def bucket_of(_id: str) -> str:
-    return hashlib.md5(_id.encode()).hexdigest()[:2]
 
 
 def main() -> int:
@@ -37,7 +32,7 @@ def main() -> int:
     missing = []
     done = 0
     for row in rows:
-        p = os.path.join(args.out_dir, bucket_of(row["id"]), f"{row['id']}.cif.gz")
+        p = os.path.join(args.out_dir, f"{row['id']}.cif.gz")
         if os.path.exists(p) and os.path.getsize(p) > 0:
             done += 1
         else:

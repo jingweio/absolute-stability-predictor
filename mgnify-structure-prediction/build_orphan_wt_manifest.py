@@ -16,14 +16,9 @@ Only READS existing data; only WRITES new files under --out-dir.
 """
 import argparse
 import csv
-import hashlib
 import os
 
 csv.field_size_limit(1 << 24)
-
-
-def bucket_of(_id: str) -> str:
-    return hashlib.md5(_id.encode()).hexdigest()[:2]
 
 
 def main() -> int:
@@ -68,7 +63,7 @@ def main() -> int:
         for row in csv.DictReader(fh):
             pdb = row["PDB_name"]
             if pdb in orph and row["name"] != pdb:  # an orphan mutant row
-                relpath = f"data/{args.struct_subdir}/{bucket_of(pdb)}/{pdb}.cif.gz"
+                relpath = f"data/{args.struct_subdir}/{pdb}.cif.gz"
                 w.writerow([row["name"], pdb, row["split"], row["dG"], relpath, "False"])
                 n_links += 1
 

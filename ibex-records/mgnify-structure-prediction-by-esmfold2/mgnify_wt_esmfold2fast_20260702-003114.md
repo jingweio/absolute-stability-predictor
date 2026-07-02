@@ -20,7 +20,7 @@
     显式记录于 `data/esmfold2_fast_wt_input/orphan_pdb_names.txt`（不静默丢弃）。
   - 序列长度 60–80 aa（median 70）。
 - **输出格式**：gzip 压缩 mmCIF（`<id>.cif.gz`，ESMFold2 原生 `to_mmcif()`）。
-  - 目录分 **256 桶**（`md5(id)[:2]`）避免单目录 ~53 万文件。
+  - 目录**扁平**存放：`<id>.cif.gz` 直接在目录下，按 `PDB_name` 直接索引（早期曾用 256 桶 `md5(id)[:2]`，后按需求扁平化）。
   - 原子写（`.tmp`→`os.replace`）：断点续跑安全，partial 文件不计为完成。
   - B-factor/pLDDT：每条 mean pLDDT + pTM 记入 per-shard metrics TSV，供后续按置信度筛选。
 - **tag（用户指示）**：存储文件夹与文档均标 fast → 目录名 `esmfold2-fast-pred-structure`。
@@ -78,7 +78,7 @@
   - 抽查 `rocklin_batch2_667445.cif.gz` 为合法 mmCIF（455 原子行）。
 - ★ **预测结构绝对路径（Ibex，暂存于此）**：
   `/ibex/user/guoj0f/absolute-stability-predictor/mgnify-structure-prediction-by-esmfold2/data/esmfold2-fast-pred-structure/`
-  （256 桶 `md5(id)[:2]`，每个 `<id>.cif.gz`；B-factor/plddt 记于 `results/fold_logs/shard*_metrics.tsv`）
+  （**扁平**：每个 `<id>.cif.gz` 直接在目录下；B-factor/plddt 记于 `results/fold_logs/shard*_metrics.tsv`）
 - 复现：`ibex-records/mgnify-structure-prediction-by-esmfold2/sh/fold_array_20260702-010936.sh`
 - 验收：`check_completeness.py --manifest wt_manifest.csv --out-dir <★> --redo-manifest redo.csv --metrics-glob '<fold_logs>/shard*_metrics.tsv'`
 
@@ -89,7 +89,7 @@
 - **目的**：为 **4,623 个 orphan scaffold**（WT 被 filter 出训练索引，但其 mutant 仍在 train）补 fold WT 结构，供 orphan mutant **threading**（补齐主任务按 WT 行 fold 时漏掉的这部分）。
 - **数据来源**：orphan WT 序列从完整 CSV `230515_...csv` 的 `aa_seq` 找回（实测 **4,623/4,623**，0 缺失）。
 - **⚠ 尊重作者 benchmark 设计（用户第4点）**：这些 WT 为 **structure-only** —— 标 `split=filtered_wt_structure_only`、`ddg_eligible=False`，**绝不作为训练/benchmark 样本**（不重新引入被 filter 的 WT）。关联的 **6,391 个 orphan mutant 全部在 `train` split**（不碰 test/val benchmark）。
-- **不混淆（用户第2点）**：输出到**独立目录** `data/esmfold2-fast-pred-structure-orphan-wt/`（256 桶），**与主 528,365 严格分开**；跑完单独同步回本地。
+- **不混淆（用户第2点）**：输出到**独立目录** `data/esmfold2-fast-pred-structure-orphan-wt/`（**扁平**），**与主 528,365 严格分开**；跑完单独同步回本地。
 - **link（用户第3点）**：`data/esmfold2_fast_orphan_wt_input/orphan_mutant_structure_links.csv`
   （`mutant_name → PDB_name → wt_structure_relpath`，附 `ddg_eligible=False`）供下游用 MGnify 训练 dG 时消费这批 orphan mutant 的 WT 结构。
 - **配置**：同主任务（ESMFold2-Fast / 单序列 / fp32 / `num_loops=3, num_sampling_steps=50`, seed 0）；SLURM array `0-7%8`, walltime `0:45:00`；脚本 `sh/fold_orphan_wt_20260702-141644.sh`。

@@ -1,0 +1,13 @@
+HF_HOME=/home/guoj0f/share/hf_cache
+==> downloading biohub/ESMFold2-Fast
+Fetching 5 files:   0%|                                                                         | 0/5 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 5 files:  20%|█████████████                                                    | 1/5 [00:00<00:01,  2.96it/s]Fetching 5 files:  40%|██████████████████████████                                       | 2/5 [00:00<00:00,  3.71it/s]Fetching 5 files:  80%|████████████████████████████████████████████████████             | 4/5 [00:02<00:00,  1.54it/s]Fetching 5 files: 100%|█████████████████████████████████████████████████████████████████| 5/5 [00:19<00:00,  5.78s/it]Fetching 5 files: 100%|█████████████████████████████████████████████████████████████████| 5/5 [00:19<00:00,  3.91s/it]
+==> done biohub/ESMFold2-Fast -> /home/guoj0f/share/hf_cache/hub/models--biohub--ESMFold2-Fast/snapshots/b28d8ace5e05e61e5bec1e6820cfd3e221819d12
+==> downloading biohub/ESMC-6B
+Fetching 14 files:   0%|                                                                       | 0/14 [00:00<?, ?it/s]Fetching 14 files:   7%|████▌                                                          | 1/14 [00:00<00:04,  2.91it/s]Fetching 14 files:  14%|█████████                                                      | 2/14 [00:00<00:02,  4.13it/s]Fetching 14 files:  36%|██████████████████████▌                                        | 5/14 [03:11<06:51, 45.75s/it]Fetching 14 files:  43%|███████████████████████████                                    | 6/14 [05:13<08:39, 64.99s/it]Fetching 14 files: 100%|██████████████████████████████████████████████████████████████| 14/14 [05:13<00:00, 22.38s/it]
+==> done biohub/ESMC-6B -> /home/guoj0f/share/hf_cache/hub/models--biohub--ESMC-6B/snapshots/45b0fa5d7fb06faefbd5e3b89bdcef35d564e79a
+ALL WEIGHTS DONE
+4.0K	/home/guoj0f/share/hf_cache/hub/CACHEDIR.TAG
+5.2G	/home/guoj0f/share/hf_cache/hub/models--biohub--esm3-sm-open-v1
+24G	/home/guoj0f/share/hf_cache/hub/models--biohub--ESMC-6B
+721M	/home/guoj0f/share/hf_cache/hub/models--biohub--ESMFold2-Fast

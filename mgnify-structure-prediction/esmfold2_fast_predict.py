@@ -16,7 +16,6 @@ any existing repo file or dataset.
 import argparse
 import csv
 import gzip
-import hashlib
 import os
 import sys
 import time
@@ -24,12 +23,9 @@ import time
 csv.field_size_limit(1 << 24)
 
 
-def bucket_of(_id: str) -> str:
-    return hashlib.md5(_id.encode()).hexdigest()[:2]
-
-
 def out_path(out_dir: str, _id: str) -> str:
-    return os.path.join(out_dir, bucket_of(_id), f"{_id}.cif.gz")
+    # flat layout: one file per id directly under out_dir (no hash-bucket subdirs)
+    return os.path.join(out_dir, f"{_id}.cif.gz")
 
 
 def load_shard(manifest: str, shard_id: int, num_shards: int, limit: int | None):
@@ -80,8 +76,7 @@ def main() -> int:
 
     shard, total = load_shard(args.manifest, args.shard_id, args.num_shards, args.limit)
     os.makedirs(args.log_dir, exist_ok=True)
-    for b in range(256):
-        os.makedirs(os.path.join(args.out_dir, f"{b:02x}"), exist_ok=True)
+    os.makedirs(args.out_dir, exist_ok=True)
 
     todo = [r for r in shard if not (os.path.exists(out_path(args.out_dir, r[0]))
                                      and os.path.getsize(out_path(args.out_dir, r[0])) > 0)]

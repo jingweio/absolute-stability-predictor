@@ -29,12 +29,10 @@ python $IBEXBR/mgnify-structure-prediction/esmfold2_fast_predict.py \
     --dtype float32 --seed 0 --hf-home "$HF_HOME"
 
 echo "=== compare vs author structures ==="
-bucket() { python -c "import hashlib,sys;print(hashlib.md5(sys.argv[1].encode()).hexdigest()[:2])" "$1"; }
 for id in mgnify_1A0N mgnify_1A32; do
-    b=$(bucket "$id")
     python $IBEXBR/mgnify-structure-prediction/compare_structures.py \
         --ref $IBEXBR/examples/${id}.pdb \
-        --pred $OUTDIR/$b/${id}.cif.gz \
+        --pred $OUTDIR/${id}.cif.gz \
         --label "$id"
 done
 echo "VALIDATION DONE"
